@@ -1,0 +1,216 @@
+/* ── IoT Sensors & Edge Hardware Styles ───────────────────────── */
+
+.sensor-grid {
+  padding: 28px 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+@media (max-width: 960px) {
+  .sensor-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 620px) {
+  .sensor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sensor-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.sensor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.sensor-title {
+  font-family: var(--ff-head);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.sp-on { background: rgba(29, 185, 84, 0.12); color: var(--emerald); }
+.sp-off { background: rgba(232, 71, 63, 0.1); color: var(--coral); }
+.sp-warn { background: rgba(245, 166, 35, 0.12); color: #C87600; }
+
+.sensor-val {
+  font-family: var(--ff-head);
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--teal);
+  margin: 6px 0;
+  line-height: 1.1;
+}
+.sensor-unit {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Mini Telemetry Graph */
+.mini-graph {
+  height: 54px;
+  background: var(--surface);
+  border-radius: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border-subtle);
+  padding: 6px;
+}
+.telemetry-graph-inner {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  gap: 4px;
+}
+.telemetry-bar-wrap {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.telemetry-bar {
+  width: 100%;
+  background: linear-gradient(180deg, var(--aqua), var(--teal));
+  border-radius: 3px 3px 0 0;
+  transition: height 0.4s ease;
+  min-height: 4px;
+}
+
+/* Door Simulation Buttons */
+.door-sim {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.door-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: var(--ff-head);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.door-btn.board {
+  color: var(--emerald);
+  border-color: rgba(29, 185, 84, 0.3);
+}
+.door-btn.board:hover {
+  background: rgba(29, 185, 84, 0.1);
+}
+.door-btn.alight {
+  color: var(--coral);
+  border-color: rgba(232, 71, 63, 0.3);
+}
+.door-btn.alight:hover {
+  background: rgba(232, 71, 63, 0.1);
+}
+
+/* GPS Coordinates Box */
+.gps-box {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+}
+
+/* Alert Modules Matrix */
+.alert-channels-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.channel-box {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.channel-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+.channel-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--teal);
+}
+.channel-box.alert-sos {
+  background: rgba(232, 71, 63, 0.08);
+  border-color: rgba(232, 71, 63, 0.25);
+}
+.channel-box.alert-sos .channel-lbl {
+  color: var(--coral);
+}
+
+/* Full Width Hardware Specs */
+.sensor-row-full {
+  grid-column: 1 / -1;
+}
+.hw-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+@media (max-width: 900px) {
+  .hw-spec-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 500px) {
+  .hw-spec-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.hw-spec-item {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+.hw-spec-item .hw-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--body);
+  margin-bottom: 4px;
+}
+.hw-spec-item .hw-val {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  color: var(--muted);
+}

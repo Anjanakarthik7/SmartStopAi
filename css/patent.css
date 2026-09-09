@@ -1,0 +1,213 @@
+/* ── Patent & Innovation Disclosure Styles ─────────────────────── */
+
+.patent-wrap {
+  padding: 28px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.patent-hero {
+  background: var(--grad);
+  border-radius: var(--r);
+  padding: 38px 32px;
+  margin-bottom: 26px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.patent-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(17, 197, 191, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.patent-hero h2 {
+  font-family: var(--ff-head);
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+  max-width: 850px;
+}
+.patent-hero p {
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 720px;
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+.patent-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.patent-badge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.patent-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 860px) {
+  .patent-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Patent Claims List */
+.claims-list {
+  list-style: none;
+  margin-top: 8px;
+}
+.claims-list li {
+  display: flex;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: var(--r-sm);
+  margin-bottom: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  align-items: flex-start;
+}
+.claim-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.claim-text {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.5;
+}
+
+/* Research Gaps */
+.gap-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+.gap-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.gap-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: rgba(232, 71, 63, 0.1);
+}
+.gap-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--coral);
+  fill: none;
+  stroke-width: 2.2;
+}
+.gap-text .t {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--body);
+  margin-bottom: 3px;
+}
+.gap-text .d {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Inventor Cards */
+.inventor-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: var(--surface);
+  border-radius: var(--r-sm);
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+.inv-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--ff-head);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.inv-info .name {
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--body);
+}
+.inv-info .uid {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin: 2px 0;
+}
+.inv-info .inst {
+  font-size: 11.5px;
+  color: var(--teal);
+  font-weight: 500;
+}
+
+/* Commercialization Partners */
+.company-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.company-item {
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.company-item .cn {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--body);
+  margin-bottom: 2px;
+}
+.company-item .cu {
+  font-family: var(--ff-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}

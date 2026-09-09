@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStop AI — Namma Metro Intelligent Transit System</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Modular Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/passenger.css">
+  <link rel="stylesheet" href="css/driver.css">
+  <link rel="stylesheet" href="css/sensor.css">
+  <link rel="stylesheet" href="css/elderly.css">
+  <link rel="stylesheet" href="css/patent.css">
+</head>
+<body>
+
+  <!-- Toast Notification Center -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- Primary Navigation -->
+  <nav>
+    <div class="nav-brand" onclick="App.switchView('passenger')">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M8 17l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v5l3 3"/></svg>
+      </div>
+      <h1>SmartStop<span>AI</span></h1>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="passenger">🚇 Passenger</button>
+      <button class="nav-tab" data-view="driver">🖥️ Driver Dashboard</button>
+      <button class="nav-tab" data-view="sensor">📡 IoT Sensors</button>
+      <button class="nav-tab" data-view="elderly">👴 Elderly Assist</button>
+      <button class="nav-tab" data-view="patent">📋 Patent Info</button>
+    </div>
+
+    <div class="nav-right">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span>LIVE</span>
+      </div>
+      <div class="nav-user" onclick="App.logout()" title="Click to switch profile or log out">
+        <div class="nav-avatar" id="nav-avatar">?</div>
+        <span class="nav-name" id="nav-name">Guest</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Modal Overlay -->
+  <div id="login-overlay" class="modal-overlay">
+    <div class="card modal-dialog fade-in">
+      <div style="position: relative;">
+        <button onclick="App.closeLoginModal()" style="position: absolute; right: 0; top: -6px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 6px;" title="Explore without login">✕</button>
+      </div>
+      <div class="card-icon ci-teal" style="width: 58px; height: 58px; border-radius: 14px; margin: 0 auto 16px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <h2 style="font-family: var(--ff-head); font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Welcome to SmartStop AI</h2>
+      <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 20px;">Personalised transit intelligence for Namma Metro Bengaluru</p>
+      
+      <div class="form-row">
+        <input type="text" id="login-name" placeholder="Enter passenger name" style="text-align: center; font-size: 15px;" onkeydown="if(event.key==='Enter') App.login()">
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+        <button class="btn btn-secondary btn-sm" onclick="App.login('Karthik')">👤 Karthik</button>
+        <button class="btn btn-secondary btn-sm" onclick="App.login('Shreyas')">👤 Shreyas</button>
+        <button class="btn btn-secondary btn-sm" onclick="App.login('Elderly Commuter')">👴 Elderly Guest</button>
+      </div>
+
+      <button class="btn btn-primary btn-full" style="font-size: 15px; padding: 13px;" onclick="App.login()">Start Journey →</button>
+      <button class="btn btn-secondary btn-full" style="margin-top: 8px; font-size: 13px;" onclick="App.closeLoginModal()">Explore System as Guest</button>
+      <p style="font-size: 11px; color: var(--muted); margin-top: 14px;">BMRCL Network Integration · Bengaluru</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. PASSENGER VIEW                                           -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="page view active" id="view-passenger">
+    <!-- Hero Banner -->
+    <div class="hero">
+      <div class="hero-content">
+        <div class="tag tag-aqua" style="margin-bottom: 12px;">● Namma Metro — Bengaluru Corridor</div>
+        <h2>AI-Powered Journey Assistant</h2>
+        <p>Real-time Bayesian destination forecasting · Pre-arrival proximity alerts · Accessibility guidance</p>
+        <div class="hero-stats">
+          <div class="stat-chip">
+            <div class="val" id="stat-onboard">0</div>
+            <div class="lbl">Onboard</div>
+          </div>
+          <div class="stat-chip">
+            <div class="val">95%</div>
+            <div class="lbl">AI Accuracy</div>
+          </div>
+          <div class="stat-chip">
+            <div class="val" id="stat-stops">37</div>
+            <div class="lbl">Network Stops</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="content-grid">
+      <!-- Left: Journey Setup -->
+      <div class="card" id="journey-card">
+        <div class="card-head">
+          <h3>Journey Setup</h3>
+          <div class="card-icon ci-teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M3 12h18M12 3l9 9-9 9"/></svg>
+          </div>
+        </div>
+
+        <div id="setup-form">
+          <!-- Elderly Mode Switch -->
+          <div class="elderly-row">
+            <div class="info">
+              <strong>Elderly / Accessibility Mode</strong>
+              <span>Enhanced high-contrast + audio guidance</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="elderly-toggle">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label for="line-sel">Metro Line</label>
+            <select id="line-sel"></select>
+          </div>
+
+          <div class="form-row">
+            <label for="src-sel">Boarding Station</label>
+            <select id="src-sel">
+              <option value="">— Select Boarding Station —</option>
+            </select>
+          </div>
+
+          <!-- AI Prediction Block -->
+          <div class="ai-prediction" id="ai-block">
+            <div class="ai-pred-head">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              <span>✨ AI Destination Forecast</span>
+            </div>
+            <div class="ai-pred-body">
+              <div class="ai-dest" id="ai-dest-text">—</div>
+              <div class="ai-meta" id="ai-meta-text"></div>
+              
+              <div class="conf-track">
+                <div class="conf-fill" id="ai-conf-fill"></div>
+              </div>
+              <div class="conf-label" id="ai-conf-label"></div>
+
+              <div id="ai-alternatives" class="ai-alternatives"></div>
+
+              <div class="ai-actions">
+                <button class="btn btn-primary btn-sm" onclick="App.confirmJourney(true)">✓ Confirm Destination</button>
+                <button class="btn btn-secondary btn-sm" onclick="App.showManualSelect()">Change Manually →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Destination Selection -->
+          <div class="manual-wrap" id="manual-wrap">
+            <div class="form-row">
+              <label for="manual-sel">Pick Custom Destination</label>
+              <select id="manual-sel"></select>
+            </div>
+            <button class="btn btn-navy btn-full" onclick="App.confirmJourney(false)">Confirm Journey</button>
+          </div>
+        </div>
+
+        <!-- Tracking Active Block -->
+        <div id="tracking-active">
+          <div class="tracking-badge">
+            <div class="pulse-dot"></div>
+            <div class="text">
+              <strong>SMART AI TRACKING ENGAGED</strong>
+              <span id="tracking-sub">Monitoring your stops along the corridor...</span>
+            </div>
+          </div>
+          <button class="btn-sos" onclick="App.triggerSOS()">🚨 SOS EMERGENCY</button>
+          <button class="btn btn-secondary btn-full" style="margin-top: 12px;" onclick="App.resetJourney()">End / Cancel Journey</button>
+        </div>
+      </div>
+
+      <!-- Right: Live Route Progress -->
+      <div class="card" id="map-card" style="opacity: 0.4; pointer-events: none;">
+        <div class="card-head">
+          <h3>Live Route Progression</h3>
+          <div class="card-icon ci-navy">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+
+        <div class="map-card-inner">
+          <div class="destination-display" id="dest-display">
+            <div class="lbl">Destination Station</div>
+            <div class="dest" id="tracking-dest">—</div>
+          </div>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-lbl">
+              <span>Journey Distance Completed</span>
+              <span id="prog-pct">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="prog-fill"></div>
+            </div>
+          </div>
+
+          <div class="route-timeline" id="route-path"></div>
+
+          <div class="journey-controls">
+            <button class="next-btn" onclick="App.advanceStation()">▶ Arrived at Next Station</button>
+            <button class="btn btn-secondary" id="auto-sim-btn" onclick="App.toggleAutoRide()">⚡ Auto-Simulate Ride</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. DRIVER DASHBOARD VIEW                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="page view" id="view-driver">
+    <!-- KPIs -->
+    <div class="dash-grid">
+      <div class="kpi-card k-teal">
+        <div class="kpi-label">Total Carriage Load</div>
+        <div class="kpi-val k-teal" id="kpi-onboard">0</div>
+        <div class="kpi-sub">Onboard passengers</div>
+        <div class="kpi-trend trend-up">● Edge Sensors Active</div>
+      </div>
+
+      <div class="kpi-card k-coral">
+        <div class="kpi-label">Active SOS Alerts</div>
+        <div class="kpi-val k-coral" id="kpi-sos">0</div>
+        <div class="kpi-sub">Emergency distress beacons</div>
+        <div class="kpi-trend">● Real-time Relay</div>
+      </div>
+
+      <div class="kpi-card k-amber">
+        <div class="kpi-label">AI Predictions</div>
+        <div class="kpi-val k-amber" id="kpi-pred">0</div>
+        <div class="kpi-sub">Destinations inferred</div>
+        <div class="kpi-trend trend-up">↑ 95% Bayesian Accuracy</div>
+      </div>
+
+      <div class="kpi-card k-emerald">
+        <div class="kpi-label">Stops Served</div>
+        <div class="kpi-val k-emerald" id="kpi-stops">0</div>
+        <div class="kpi-sub">Station stops this session</div>
+        <div class="kpi-trend trend-up">● Automated Logs</div>
+      </div>
+    </div>
+
+    <!-- Lower Layout: Chart + Terminal -->
+    <div class="dash-lower">
+      <!-- Off-boarding Demand Chart -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Real-time Off-boarding Demand per Stop</h3>
+          <div class="card-icon ci-teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="10" width="4" height="11"/><rect x="9.5" y="7" width="4" height="14"/><rect x="16" y="4" width="4" height="17"/></svg>
+          </div>
+        </div>
+        <div id="fleet-chart"></div>
+      </div>
+
+      <!-- System Terminal Log -->
+      <div class="card">
+        <div class="card-head">
+          <h3>System Event Terminal</h3>
+          <div class="card-icon ci-navy">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+        </div>
+
+        <div class="event-log" id="event-log"></div>
+
+        <!-- Simulation Tools -->
+        <div class="sim-controls-card">
+          <label for="sim-stop">Simulate Crowd Injection at Stop</label>
+          <div class="sim-input-row">
+            <select id="sim-stop" style="flex: 1;"></select>
+            <button class="btn btn-primary btn-sm" onclick="App.injectSimulatedCrowd()">+ Inject PAX</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 3. SENSOR / IoT VIEW                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="page view" id="view-sensor">
+    <div class="sensor-grid">
+      <!-- Passenger Counter -->
+      <div class="sensor-card">
+        <div class="sensor-head">
+          <div class="sensor-title">Infrared Passenger Counter</div>
+          <div class="status-pill sp-on">● HC-SR04 ACTIVE</div>
+        </div>
+        <div class="kpi-label">CURRENT ONBOARD OCCUPANCY</div>
+        <div class="sensor-val" id="sensor-count">0 <span class="sensor-unit">PAX</span></div>
+        <div class="mini-graph" id="count-graph"></div>
+        <div class="door-sim">
+          <button class="door-btn board" onclick="App.boardPaxButton()">↓ Door In (+1)</button>
+          <button class="door-btn alight" onclick="App.alightPaxButton()">↑ Door Out (-1)</button>
+        </div>
+      </div>
+
+      <!-- GPS Module -->
+      <div class="sensor-card">
+        <div class="sensor-head">
+          <div class="sensor-title">GPS Module (Neo-6M)</div>
+          <div class="status-pill sp-on">● FIX ACQUIRED</div>
+        </div>
+        <div class="kpi-label">GEOGRAPHIC COORDINATES</div>
+        <div class="gps-box">
+          <div style="font-family: var(--ff-mono); font-size: 11px; color: var(--muted); margin-bottom: 4px;">LATITUDE / LONGITUDE</div>
+          <div style="font-family: var(--ff-head); font-size: 17px; font-weight: 700; color: var(--teal);" id="gps-pos">12.9716° N, 77.5946° E</div>
+          <div style="margin-top: 8px; font-size: 11px; color: var(--muted);">CURRENT POSITION MARKER:</div>
+          <div style="font-weight: 700; font-size: 13.5px; color: var(--body); margin-top: 2px;" id="gps-stop">Central Bengaluru Network</div>
+        </div>
+        <div class="mini-graph" style="margin-top: 12px; background: rgba(17, 197, 191, 0.06); display: flex; align-items: center; justify-content: center;">
+          <div style="font-size: 11px; color: var(--teal); font-family: var(--ff-mono);">UART 9600 BAUD · NMEA $GPRMC VALID</div>
+        </div>
+      </div>
+
+      <!-- AI Engine Telemetry -->
+      <div class="sensor-card">
+        <div class="sensor-head">
+          <div class="sensor-title">AI Inference Engine</div>
+          <div class="status-pill sp-on">● INFERENCE ONLINE</div>
+        </div>
+        <div class="kpi-label">MODEL EVALUATION BENCHMARKS</div>
+        <div class="sensor-val">95<span class="sensor-unit">% ACCURACY</span></div>
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <div class="flex justify-b" style="margin-bottom: 4px; font-size: 11px;">
+              <span>Bayesian Personalized Habit</span>
+              <span style="font-weight: 700; color: var(--teal);">95%</span>
+            </div>
+            <div class="conf-track"><div class="conf-fill" style="width: 95%;"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-b" style="margin-bottom: 4px; font-size: 11px;">
+              <span>Peak-Flow Population Model</span>
+              <span style="font-weight: 700; color: var(--coral);">74%</span>
+            </div>
+            <div class="conf-track"><div class="conf-fill" style="width: 74%; background: var(--coral);"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-b" style="margin-bottom: 4px; font-size: 11px;">
+              <span>Edge IR Counting Precision</span>
+              <span style="font-weight: 700; color: var(--emerald);">98%</span>
+            </div>
+            <div class="conf-track"><div class="conf-fill" style="width: 98%; background: var(--emerald);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloud Connectivity -->
+      <div class="sensor-card">
+        <div class="sensor-head">
+          <div class="sensor-title">Cloud Infrastructure</div>
+          <div class="status-pill sp-on">● SYNCED</div>
+        </div>
+        <div class="kpi-label">DATABASE & REST PROTOCOL</div>
+        <div style="font-family: var(--ff-mono); font-size: 11px; color: var(--muted); line-height: 2.1; margin: 10px 0;">
+          ✅ firebaseio.com (SmartStop Cluster)<br>
+          ✅ FCM Push Alert Dispatch Gateway<br>
+          ✅ REST JSON Telemetry Payload<br>
+          ✅ TLS 1.3 Handshake Confirmed
+        </div>
+        <div class="flex justify-b" style="margin-top: auto;">
+          <div class="tag tag-teal">Latency: 14ms</div>
+          <div class="tag tag-emerald">Uptime: 99.8%</div>
+        </div>
+      </div>
+
+      <!-- Alert Dispatch Matrix -->
+      <div class="sensor-card">
+        <div class="sensor-head">
+          <div class="sensor-title">Notification Delivery Channels</div>
+          <div class="status-pill sp-on">● ALL ARMED</div>
+        </div>
+        <div class="kpi-label">MULTI-MODAL DISPATCH MODES</div>
+        <div class="alert-channels-grid">
+          <div class="channel-box">
+            <div class="channel-icon">📱</div>
+            <div class="channel-lbl">PUSH NOTIFICATION</div>
+          </div>
+          <div class="channel-box">
+            <div class="channel-icon">🔊</div>
+            <div class="channel-lbl">VOICE TTS SYNTH</div>
+          </div>
+          <div class="channel-box">
+            <div class="channel-icon">📳</div>
+            <div class="channel-lbl">HAPTIC VIBRATION</div>
+          </div>
+          <div class="channel-box alert-sos">
+            <div class="channel-icon">🚨</div>
+            <div class="channel-lbl">EMERGENCY SOS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hardware Inventory -->
+      <div class="sensor-card sensor-row-full">
+        <div class="sensor-head">
+          <div class="sensor-title">Embedded Hardware Specifications</div>
+          <div class="status-pill sp-on">● HARDWARE VERIFIED</div>
+        </div>
+        <div class="hw-spec-grid">
+          <div class="hw-spec-item">
+            <div class="hw-name">Microcontroller</div>
+            <div class="hw-val">ESP32 · Dual-Core 240MHz</div>
+          </div>
+          <div class="hw-spec-item">
+            <div class="hw-name">IR Sensor Array</div>
+            <div class="hw-val">HC-SR04 × 4 Sensors</div>
+          </div>
+          <div class="hw-spec-item">
+            <div class="hw-name">GPS Receiver</div>
+            <div class="hw-val">U-Blox Neo-6M UART</div>
+          </div>
+          <div class="hw-spec-item">
+            <div class="hw-name">Edge Network</div>
+            <div class="hw-val">Wi-Fi + 4G LTE Gateway</div>
+          </div>
+          <div class="hw-spec-item">
+            <div class="hw-name">Carriage Display</div>
+            <div class="hw-val">2.4" TFT ILI9341 SPI</div>
+          </div>
+          <div class="hw-spec-item">
+            <div class="hw-name">Power Supply</div>
+            <div class="hw-val">5V 2.5A Regulated USB-C</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 4. ELDERLY ASSIST VIEW                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="page view" id="view-elderly">
+    <div class="elder-wrap">
+      <!-- Safe Journey Hero -->
+      <div class="elder-hero">
+        <div class="tag" style="background: rgba(255, 255, 255, 0.16); color: #fff; margin-bottom: 14px; font-size: 13px;">
+          👴 Safe Journey Accessibility System
+        </div>
+        <h2>Accessible Travel Assistance</h2>
+        <p>Large high-contrast display, voice guidance alerts, and direct caregiver relay for worry-free transit.</p>
+
+        <div class="elder-dest-box">
+          <div class="lbl">Current Travel Destination</div>
+          <div class="dest" id="elder-dest-text">Not configured — set up your journey in the Passenger tab</div>
+        </div>
+
+        <div class="elder-btn-grid">
+          <button class="elder-action-btn sos-big" onclick="App.triggerSOS()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            🚨 SOS DISTRESS BEACON
+          </button>
+          <button class="elder-action-btn ea-green" onclick="App.voiceRepeatAnnouncement()">
+            <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
+            🔊 Repeat Spoken Announcement
+          </button>
+          <button class="elder-action-btn ea-blue" onclick="App.notifyCaregiverAction('Ramesh')">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .11h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            📲 Notify Caregivers Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Caregivers & Milestones -->
+      <div class="caregiver-grid-layout">
+        <!-- Contacts -->
+        <div class="card">
+          <div class="card-head">
+            <h3>Registered Caregivers</h3>
+            <div class="tag tag-teal">3 Contacts</div>
+          </div>
+          <div class="cg-row">
+            <div class="cg-avatar" style="background: linear-gradient(135deg, #0B7A75, #0F2D55);">R</div>
+            <div class="cg-info">
+              <div class="name">Ramesh Kumar (Son)</div>
+              <div class="role">Primary Emergency Contact · +91 98450 12345</div>
+            </div>
+            <button class="cg-notify" onclick="App.notifyCaregiverAction('Ramesh')">Notify</button>
+          </div>
+          <div class="cg-row">
+            <div class="cg-avatar" style="background: linear-gradient(135deg, #E8473F, #0F2D55);">P</div>
+            <div class="cg-info">
+              <div class="name">Priya Sharma (Daughter)</div>
+              <div class="role">Secondary Contact · +91 99001 67890</div>
+            </div>
+            <button class="cg-notify" onclick="App.notifyCaregiverAction('Priya')">Notify</button>
+          </div>
+          <div class="cg-row">
+            <div class="cg-avatar" style="background: linear-gradient(135deg, #F5A623, #0F2D55);">M</div>
+            <div class="cg-info">
+              <div class="name">Metro Station Master</div>
+              <div class="role">Transit Authority · Toll-Free 1800-425-12345</div>
+            </div>
+            <button class="cg-notify" onclick="App.notifyCaregiverAction('Station Master')">Notify</button>
+          </div>
+        </div>
+
+        <!-- Milestones Feed -->
+        <div class="card">
+          <div class="card-head">
+            <h3>Journey Milestones Audit</h3>
+          </div>
+          <div class="milestone-feed" id="milestone-feed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 5. PATENT INFO VIEW                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="page view" id="view-patent">
+    <div class="patent-wrap">
+      <!-- Hero -->
+      <div class="patent-hero">
+        <div class="tag" style="background: rgba(255, 255, 255, 0.16); color: #fff; margin-bottom: 12px;">
+          📋 Official Intellectual Property Disclosure
+        </div>
+        <h2>AI-Based Smart Passenger Monitoring & Destination Alert System</h2>
+        <p>A novel smart transit architecture synchronizing IoT edge sensor arrays, machine learning destination inference, and multi-modal pre-arrival alert delivery — prototype validated on the Namma Metro network.</p>
+        <div class="patent-badges">
+          <span class="patent-badge">IPC: B61L 25/00</span>
+          <span class="patent-badge">IPC: G08G 1/00</span>
+          <span class="patent-badge">CPC: G06Q 50/40</span>
+          <span class="patent-badge">Lovely Professional University</span>
+          <span class="patent-badge">Complete Patent Filing</span>
+        </div>
+      </div>
+
+      <div class="patent-grid">
+        <!-- Claims -->
+        <div class="card">
+          <div class="card-head">
+            <h3>Patent Claims (1 – 7)</h3>
+          </div>
+          <ul class="claims-list">
+            <li>
+              <div class="claim-num">1</div>
+              <div class="claim-text">System for real-time intelligent passenger monitoring with AI inference engine predicting individual destination stops.</div>
+            </li>
+            <li>
+              <div class="claim-num">2</div>
+              <div class="claim-text">AI engine applying personalised travel history (Bayesian inference) to produce destination probability scores.</div>
+            </li>
+            <li>
+              <div class="claim-num">3</div>
+              <div class="claim-text">Smart Stop Alert Module delivering multi-modal notifications — push, voice TTS, and haptic feedback.</div>
+            </li>
+            <li>
+              <div class="claim-num">4</div>
+              <div class="claim-text">Elderly Assistance Mode with enlarged UI, voice guidance, and caregiver notification relay.</div>
+            </li>
+            <li>
+              <div class="claim-num">5</div>
+              <div class="claim-text">SOS Emergency Module enabling real-time passenger-to-operator communication with GPS logging.</div>
+            </li>
+            <li>
+              <div class="claim-num">6</div>
+              <div class="claim-text">Driver/Operator Fleet Dashboard rendering real-time disembarkation demand analytics per stop.</div>
+            </li>
+            <li>
+              <div class="claim-num" style="background: var(--coral);">7</div>
+              <div class="claim-text">Method for AI-based destination prediction: collect boarding data → Bayesian inference → confidence score → pre-arrival alert.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Right: Novelty, Inventors & Commercialization -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Novelty Gaps -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Research Gap & Novelty Matrix</h3>
+            </div>
+            <div class="gap-grid">
+              <div class="gap-item">
+                <div class="gap-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="gap-text">
+                  <div class="t">US20180365990A1 — Broadcast PA Systems</div>
+                  <div class="d">Broadcasts generically to the entire train. <strong>Our novelty:</strong> Personalized destination inference & individual passenger alerts.</div>
+                </div>
+              </div>
+              <div class="gap-item">
+                <div class="gap-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="gap-text">
+                  <div class="t">US20150019124A1 — Standalone IR Sensors</div>
+                  <div class="d">Simple head-count without intelligence. <strong>Our novelty:</strong> Combines sensor count with Bayesian ML destination modeling.</div>
+                </div>
+              </div>
+              <div class="gap-item">
+                <div class="gap-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="gap-text">
+                  <div class="t">CN108022425A — Fixed Station Signage</div>
+                  <div class="d">Static hardware with no passenger interaction. <strong>Our novelty:</strong> Dynamic multi-modal alerts with SOS and caregiver relays.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventors -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Inventors</h3>
+            </div>
+            <div class="inventor-row">
+              <div class="inv-avatar" style="background: linear-gradient(135deg, var(--teal), var(--navy));">S</div>
+              <div class="inv-info">
+                <div class="name">Shreyas KS</div>
+                <div class="uid">UID: 12407112 · 📞 +91 78926 89793</div>
+                <div class="inst">Lovely Professional University, Punjab</div>
+              </div>
+            </div>
+            <div class="inventor-row">
+              <div class="inv-avatar" style="background: linear-gradient(135deg, var(--coral), var(--navy));">K</div>
+              <div class="inv-info">
+                <div class="name">Kothamasu Anjana Karthik</div>
+                <div class="uid">UID: 12411006 · 📞 +91 86391 15751</div>
+                <div class="inst">Lovely Professional University, Punjab</div>
+              </div>
+            </div>
+            <div style="background: rgba(245, 166, 35, 0.08); border: 1px solid rgba(245, 166, 35, 0.25); border-radius: var(--r-sm); padding: 12px; margin-top: 8px;">
+              <div style="font-size: 12px; color: #C87600; font-weight: 700;">Status: <strong>Complete Filing · Patent Granted / Under Review</strong></div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Commercialization Grade: High Scalability Transit Solution</div>
+            </div>
+          </div>
+
+          <!-- Commercialization Partners -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Target Commercialization Partners</h3>
+            </div>
+            <div class="company-grid">
+              <div class="company-item"><div class="cn">BMRCL (Namma Metro)</div><div class="cu">bmrc.co.in</div></div>
+              <div class="company-item"><div class="cn">DMRC (Delhi Metro)</div><div class="cu">delhimetrorail.com</div></div>
+              <div class="company-item"><div class="cn">IRCTC (Indian Railways)</div><div class="cu">irctc.co.in</div></div>
+              <div class="company-item"><div class="cn">TCS Smart City Solutions</div><div class="cu">tcs.com</div></div>
+              <div class="company-item"><div class="cn">Wipro IoT & Smart Mobility</div><div class="cu">wipro.com</div></div>
+              <div class="company-item"><div class="cn">L&T Smart World</div><div class="cu">lntsmart.com</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modular Application Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/ai-engine.js"></script>
+  <script src="js/sensors.js"></script>
+  <script src="js/driver.js"></script>
+  <script src="js/elderly.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
